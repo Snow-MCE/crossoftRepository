@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <style>
+        .el-form-item {
+            margin-bottom: 7px;
+        }
+        .el-tabs__content{
+            height: 400px;
+        }
+        .el-transfer-panel{
+            width: 400px;
+        }
+        .el-row {
+            margin-bottom: 10px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <el-row>
+        <el-col :span="20">
+            <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="1">
+                    <el-button type="primary" size="large" icon="search" @click="query">检索</el-button>
+                    <el-button type="primary" size="large">保存</el-button>
+                    <el-button type="primary" size="large" @click="clear">清除</el-button>
+                    <el-button type="primary" size="large" icon="delete">删除</el-button>
+                </el-menu-item>
+            </el-menu>
+        </el-col>
+        <el-col :span="4">
+            <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="2"><span style="font-size: 2em;">作业维护</span></el-menu-item>
+            </el-menu>
+        </el-col>
+    </el-row>
+
+    <el-form :model="acitivityMainForm" ref="acitivityMainForm" label-width="100px">
+    <div style="padding: 30px;">
+            <el-row type="flex" class="row-bg" justify="center">
+                <el-col :span="8">
+                    <div class="grid-content bg-purple-light">
+                        <el-form-item label="作业 :">
+                            <el-input v-model="acitivityMainForm.activity">
+                                <el-button slot="append" icon="search" @click="dialogTableVisible = true"></el-button>
+                            </el-input>
+                        </el-form-item>
+                    </div>
+                </el-col>
+            </el-row>
+        <el-dialog title="作业" :visible.sync="dialogTableVisible" top="5%">
+            <el-table :data="gridData" border style="width: 100%" height="600" highlight-current-row @row-dblclick="selectedRowActivity">
+                <el-table-column property="activity" label="作业" width="230"></el-table-column>
+                <el-table-column property="activityDesc" label="作业描述" width="500"></el-table-column>
+            </el-table>
+        </el-dialog>
+
+    </div>
+    <!--<p style="line-height:100%">-->
+    <template>
+        <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="主要信息" name="first">
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="9">
+                        <div class="grid-content bg-purple-light">
+                            <el-form-item label="描述 :">
+                            <el-input v-model="acitivityMainForm.desc" label="描述" placeholder="描述">
+                            </el-input>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="6">
+                        <div class="grid-content bg-purple-light">
+                            <template>
+                                <!-- `checked` 为 true 或 false -->
+                                <el-form-item>
+                                <el-checkbox v-model="acitivityMainForm.enabled">已启用</el-checkbox>
+                                </el-form-item>
+                            </template>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="6">
+                        <div class="grid-content bg-purple-light">
+                            <template>
+                                <!-- `checked` 为 true 或 false -->
+                                <el-form-item>
+                                <el-checkbox v-model="acitivityMainForm.visible">在作业管理器中可见</el-checkbox>
+                                </el-form-item>
+                            </template>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="9">
+                        <div class="grid-content bg-purple-light">
+                            <el-form-item label="类/程序 :">
+                            <el-input v-model="acitivityMainForm.classOrProgram" placeholder="类/程序">
+                            </el-input>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="9">
+                        <template>
+                            <el-form-item label="类型 :">
+                            <el-select v-model="acitivityMainForm.activityType" clearable placeholder="请选择">
+                                <el-option
+                                        v-for="activityType in typeOptions"
+                                        :key="activityType.value"
+                                        :label="activityType.label"
+                                        :value="activityType.value">
+                                </el-option>
+                            </el-select>
+                            </el-form-item>
+                        </template>
+                    </el-col>
+                </el-row>
+            </el-tab-pane>
+            <el-tab-pane label="规则" name="second">
+                <template>
+                    <el-table
+                            :data="ruleTab"
+                            height="400"
+                            border
+                            style="width: 100%" stripe="true" highlight-current-row="true" @sort-change="addNewColumn">
+                        <el-table-column
+                                prop="rule"
+                                label="规则"
+                                width="220"
+                                sortable="custom">
+                        </el-table-column>
+                        <el-table-column label="设置" width="600" prop="setV">
+                        </el-table-column>
+                        <el-table-column label="操作" width="200">
+                            <template scope="scope">
+                                <el-button
+                                        size="small"
+                                        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                                <el-button
+                                        size="small"
+                                        type="danger"
+                                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </el-tab-pane>
+            <el-tab-pane label="作业组" name="third">
+
+            </el-tab-pane>
+        </el-tabs>
+    </template>
+    </el-form>
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mock.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mockdata.js"></script>
+<script>
+    //  ------------ 测试产生虚拟数据 -------------------
+    const _groupList = [];
+    for( var i = 0; i < 20; i++){
+        _groupList.push(
+            Mock.mock({
+                "key": Mock.Random.integer(60, 100),
+                "label":Mock.Random.string('upper', 5)
+            })
+        );
+    }
+
+    const _activityList = [];
+    for( var i = 0; i < 20; i++){
+        _activityList.push(
+            Mock.mock({
+                "activity": Mock.mock('@string("upper", 4, 6)'),
+                "activityDesc":Mock.mock('@ctitle(3, 5)')
+            })
+        );
+    }
+
+    const _typeList = [];
+    for( var i = 0; i < 20; i++){
+        _typeList.push(
+            Mock.mock({
+                "value": Mock.mock('@zip'),
+                "label|1": ["java类","服务","独立GUI","移动视图","外部URL","企业JavaBeans","生产操作员面板选择"],
+            })
+        );
+    }
+
+    const _ruleList = [];
+    for( var i = 0; i < 20; i++){
+        _ruleList.push(
+            Mock.mock({
+                "rule": Mock.mock('@zip'),
+                "setV": Mock.mock('@cname()'),
+            })
+        );
+    }
+    const activityInfo =  Mock.mock({
+        "activity":Mock.mock('@last()'),
+        "desc":Mock.mock('@ctitle(5)'),
+        "enabled":Mock.mock('@boolean'),
+        "visible":Mock.mock('@boolean()'),
+        "activityType":"",
+        "classOrProgram":Mock.mock('@name(true)')
+    })
+    //  ------------ 赋值 ------------------------
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                activeName: 'first',
+                acitivityMainForm:{
+                    activity : "",
+                    desc : "",
+                    classOrProgram : "",
+                    activityType : "",
+                    enabled : "",
+                    visible : ""
+                },
+                pickerOptions0: {
+                    disabledDate(time) {
+                        return time.getTime() < Date.now() - 8.64e7;
+                    }
+                },
+                formInline: {
+                    userId: ''
+                },
+                userFormRules:{
+
+                },
+                gridData: _activityList,
+                dialogTableVisible: false,
+                activityType: '',
+                typeOptions : _typeList,
+                ruleTab : _ruleList
+            }
+        },
+        methods: {
+            filterMethod() {
+                console.log('submit!');
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            query(){
+                var me = this;
+                for( var p in me.acitivityMainForm){
+                    me.acitivityMainForm[p] = activityInfo[p]?activityInfo[p]:"";
+                }
+            },
+            clear(){
+                var me = this;
+                for( var p in me.acitivityMainForm){
+                    me.acitivityMainForm[p] = "";
+                }
+            },
+            handleIconClick(ev) {
+                console.log(ev);
+            },
+            handleEdit(index, row) {
+                console.log(index, row);
+            },
+            handleDelete(index, row) {
+                this.$confirm("将删除"+row.rule+"行, 是否继续?", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            addNewColumn() {
+                this.$message("新添加一行");
+            },
+            selectedRowActivity(row, event) {
+                var activity = row.activity;
+                var activityDesc = row.activityDesc;
+                this.dialogTableVisible=false;
+                this.acitivityMainForm.activity = activity;
+                this.acitivityMainForm.desc = activityDesc;
+            }
+        }
+    })
+</script>
+</html>

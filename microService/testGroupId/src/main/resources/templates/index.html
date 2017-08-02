@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<h1 th:inline="text">大家好,我是一个HTML界面！</h1>
+<p th:text="'Hello！, ' + ${test} + '!'" ></p>
+<form action="submi.html" th:action="@{/submi}">
+    <table border="1" cellspacing="0" bgcolor="#faebd7">
+        <tr><th th:text="${name}" th:width="100px"></th><th th:text="${price}" th:width="100px"></th></tr>
+        <tbody>
+        <tr>
+            <td>西瓜</td>
+            <td th:text="FF">1.8</td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center"><img th:src="@{/S001.png}" alt="图片"/></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="text" th:name="inputV" /></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit" value="提交" /></td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<input type="button" th:value="注销" th:action="@{/logout}"/>
+</body>
+</html>

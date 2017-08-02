@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <style>
+        .el-form-item {
+            margin-bottom: 7px;
+        }
+        .el-tabs__content{
+            height: 400px;
+        }
+        .el-transfer-panel{
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+     <el-row>
+            <el-col :span="20">
+                <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                    <el-menu-item index="1">
+                        <el-button type="primary" size="large" icon="search" @click="query">检索</el-button>
+                        <el-button type="primary" size="large">保存</el-button>
+                        <el-button type="primary" size="large" @click="clear">清除</el-button>
+                        <el-button type="primary" size="large" icon="delete">删除</el-button>
+                    </el-menu-item>
+                </el-menu>
+            </el-col>
+         <el-col :span="4">
+             <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                 <el-menu-item index="2"><span style="font-size: 2em;">用户维护</span></el-menu-item>
+             </el-menu>
+         </el-col>
+        </el-row>
+<div style="padding: 30px;">
+    <el-row :gutter="8">
+        <el-col :span="8" :offset="7">
+            <div class="grid-content bg-purple">
+                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                    <el-form-item label="用户标识 : ">
+                        <el-input placeholder=""
+                                  icon="search"
+                                  v-model="formInline.userId"
+                                  :on-icon-click="handleIconClick"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-col>
+    </el-row>
+</div>
+    <!--<p style="line-height:100%">-->
+    <template>
+        <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="主要信息" name="first">
+                <el-form :model="userForm" :rules="userFormRules" ref="userForm" label-width="100px">
+                    <el-row :gutter="10">
+                        <el-col :span="12">
+                            <el-form-item label="用户密码 :">
+                                <el-input v-model="userForm.password"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="10">
+                        <el-col :span="12">
+                            <el-form-item label="用户姓名 :">
+                                <el-input v-model="userForm.name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="生效日期 :">
+                                <el-date-picker
+                                        v-model="userForm.date_effect"
+                                        type="date"
+                                        placeholder="选择日期"
+                                        :picker-options="pickerOptions0">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="邮箱 :">
+                                <el-input v-model="userForm.e_mail"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="用户编号 :">
+                                <el-input v-model="userForm.number"></el-input>
+                            </el-form-item>
+                            <el-form-item label="失效日期 :">
+                                <el-date-picker
+                                        v-model="userForm.date_expire"
+                                        type="date"
+                                        placeholder="选择日期"
+                                        :picker-options="pickerOptions0">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="状态 :">
+                                <el-input v-model="userForm.status" :disabled="true"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="用户组" name="second">
+                <template>
+                  <el-transfer v-model="selectGroup" :data="userGroup" :titles="['可用用户组', '已分配用户组']" filterable="true"></el-transfer>
+                </template>
+            </el-tab-pane>
+            <el-tab-pane label="工作中心" name="third">
+                <template>
+                    <el-transfer v-model="selectGroup" :data="workCenter" :titles="['可用工作中心', '已分配工作中心']" filterable="true"></el-transfer>
+                </template>
+            </el-tab-pane>
+            <el-tab-pane label="自定义字段" name="fourth">自定义字段</el-tab-pane>
+        </el-tabs>
+    </template>
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mock.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mockdata.js"></script>
+<script>
+    //  ------------ 测试产生虚拟数据 -------------------
+    const _groupList = [];
+    for( var i = 0; i < 20; i++){
+        _groupList.push(
+            Mock.mock({
+                "key": Mock.Random.integer(60, 100),
+                "label":Mock.Random.string('upper', 5)
+            })
+        );
+    }
+
+    const _workCenterList = [];
+    for( var i = 0; i < 20; i++){
+        _workCenterList.push(
+            Mock.mock({
+                "key": Mock.Random.integer(60, 100),
+                "label":Mock.Random.string('upper', 5)
+            })
+        );
+    }
+
+    const userInfra =  Mock.mock({
+        "name":Mock.Random.cname(),
+        "e_mail":Mock.Random.email(),
+        "status|1":["生效","作废"],
+        "date_effect":Mock.Random.date('yyyy-MM-dd'),
+        "date_expire":Mock.Random.date('yyyy-MM-dd')
+    })
+    //  ------------ 赋值 ------------------------
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                activeName: 'first',
+                userForm:{
+                    password:'',
+                    name:'',
+                    number:'',
+                    e_mail:'',
+                    status:'',
+                    date_effect:'',
+                    date_expire:''
+                },
+                pickerOptions0: {
+                    disabledDate(time) {
+                        return time.getTime() < Date.now() - 8.64e7;
+                    }
+                },
+                formInline: {
+                    userId: ''
+                },
+                userFormRules:{
+
+                },
+                userGroup:_groupList,
+                selectGroup:[],
+                workCenter:_workCenterList
+            }
+        },
+        methods: {
+            filterMethod() {
+                console.log('submit!');
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            query(){
+                var me = this;
+                for( var p in me.userForm){
+                    me.userForm[p] = userInfra[p]?userInfra[p]:"";
+                }
+            },
+            clear(){
+                var me = this;
+                for( var p in me.userForm){
+                    me.userForm[p] = "";
+                }
+            },
+            handleIconClick(ev) {
+              console.log(ev);
+            }
+        }
+    })
+</script>
+</html>

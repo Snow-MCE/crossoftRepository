@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <style>
+        .el-form-item {
+            margin-bottom: 7px;
+        }
+        .el-tabs__content{
+            height: 400px;
+        }
+        .el-transfer-panel{
+            width: 400px;
+        }
+        .el-row {
+            margin-bottom: 10px;
+        }
+        .el-row last-child {
+             margin-bottom: 5px;
+         }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-row style="margin-bottom: 2px;">
+        <el-col :span="24">
+            <el-menu theme="dark" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="2"><span style="font-size: 2em;">物料清单拆分维护</span></el-menu-item>
+            </el-menu>
+        </el-col>
+    </el-row>
+
+    <div style="padding-top: 0px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;">
+        <el-row :gutter="20" justify="center" class="row-bg">
+            <el-col :span="11">
+                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                    <fieldset style="height: 640px;">
+                        <legend>原始BOM</legend>
+                        <el-row type="flex">
+                            <el-col>
+                                <el-form-item label="BOM : ">
+                                    <el-input v-model="formInline.bom">
+                                        <el-button slot="append" icon="search" @click="itemBomSearchDialog = true"></el-button>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item label="版本 :">
+                                    <el-input v-model="formInline.version" placeholder="版本"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row type="flex">
+                            <el-col>
+                                <el-form-item label="有效期至 : ">
+                                    <el-input v-model="formInline.endDate" placeholder="有效期至" :disabled="true"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item label="描述 : ">
+                                    <el-input v-model="formInline.description" placeholder="描述" :disabled="true"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :offset="5">
+                                <el-button type="primary" @click="showItemComponent">检索</el-button>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col>
+                                <template>
+                                    <el-table
+                                            ref="multipleTable"
+                                            :data="itemData"
+                                            height="400"
+                                            border
+                                            tooltip-effect="dark"
+                                            style="width: 100%">
+                                        <el-table-column
+                                                type="selection"
+                                                width="55">
+                                        </el-table-column>
+
+                                        <el-table-column
+                                                label="顺序"
+                                                prop="sequence"
+                                                width="70">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="assyItem"
+                                                label="组件/版本"
+                                                width="180">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="assyQty"
+                                                label="装配数量"
+                                                show-overflow-tooltip>
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="measure"
+                                                label="单位"
+                                                show-overflow-tooltip>
+                                        </el-table-column>
+                                    </el-table>
+                                </template>
+                            </el-col>
+                        </el-row>
+                    </fieldset>
+                </el-form>
+            </el-col>
+            <el-col :span="2">
+                <div class="grid-content">
+                    <el-col :span="2">
+                        <div align="center">
+                            <el-row>
+                                <el-col>
+                                    <el-button type="primary" @click="load" class="el-icon-d-arrow-right"></el-button>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col>
+                                    <el-button type="primary" @click="remove" class="el-icon-d-arrow-left"></el-button>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-col>
+                </div>
+            </el-col>
+            <el-col :span="11">
+
+                <el-form :inline="true" :model="bomForm" class="demo-form-inline">
+                    <fieldset style="height: 640px;">
+                        <legend>拆分BOM</legend>
+                        <el-row :gutter="10">
+                            <el-col>
+                                <el-form-item label="BOM : ">
+                                    <el-input v-model="bomForm.bom">
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item label="版本 : ">
+                                    <el-input v-model="bomForm.version" placeholder="版本"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col>
+                                <el-form-item label="描述 : ">
+                                    <el-input v-model="bomForm.version" placeholder="描述"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="20">
+                            <el-col>
+                                <el-button type="primary">保存</el-button>
+                                <el-button type="primary" @click="bomComponentDialog = true">创建物料</el-button>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col>
+                                <div class="grid-content bg-purple">
+                                    <el-tree
+                                            ref="bomTree"
+                                            check-strictly
+                                            :data="bomData"
+                                            show-checkbox
+                                            node-key="id"
+                                            default-expand-all
+                                            @check-change="checkChange"
+                                            :expand-on-click-node="false"
+                                            style="width: 100%">
+                                    </el-tree>
+                                </div>
+                            </el-col>
+                        </el-row>
+                    </fieldset>
+                </el-form>
+            </el-col>
+        </el-row>
+
+        <!-- 创建物料弹出框 -->
+
+        <el-dialog title="创建新物料" :visible.sync="bomComponentDialog">
+            <el-form :model="newItemForm">
+                <el-row justify="center" type="flex" class="row-bg" :gutter="3" >
+                    <el-col :span="8"><div>
+                        <el-form-item label="物料:">
+                            <el-input placeholder="" v-model="newItemForm.item">
+                            </el-input>
+                        </el-form-item>
+                    </div>
+                    </el-col>
+                    <el-col :span="8">
+                        <div>
+                            <el-form-item label="版本:">
+                                <el-input v-model="newItemForm.version" auto-complete="off"></el-input>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg" :gutter="3">
+                    <el-col :span="16">
+                        <el-form-item label="描述:">
+                            <el-input v-model="newItemForm.desc" auto-complete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="bomComponentDialog = false">取 消</el-button>
+                <el-button type="primary" @click="createNewItem">确 定</el-button>
+            </div>
+        </el-dialog>
+
+        <!-- BOM检索弹出框 -->
+        <el-dialog title="物料清单" :visible.sync="itemBomSearchDialog" top="5%">
+            <el-table :data="ItemBomData" border style="width: 100%" height="600" highlight-current-row @row-dblclick="selectedRowBom">
+                <el-table-column property="bom" label="物料清单" width="230"></el-table-column>
+                <el-table-column property="description" label="描述" width="300"></el-table-column>
+                <el-table-column property="reversion" label="版本" width="200"></el-table-column>
+            </el-table>
+        </el-dialog>
+    </div>
+
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mock.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mockdata.js"></script>
+<script type="text/javascript" src="bomSplitData.js"></script>
+<script type="text/javascript" src="bomSplit.js"></script>
+
+</html>

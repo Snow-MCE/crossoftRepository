@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <style>
+        .el-form-item {
+            margin-bottom: 7px;
+        }
+        .el-tabs__content{
+            height: 400px;
+        }
+        .el-transfer-panel{
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <el-row>
+        <el-col :span="20">
+            <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="1">
+                    <el-button type="primary" size="large" icon="search" @click="query">检索</el-button>
+                    <el-button type="primary" size="large">保存</el-button>
+                    <el-button type="primary" size="large" @click="clear">清除</el-button>
+                    <el-button type="primary" size="large" icon="delete">删除</el-button>
+                </el-menu-item>
+            </el-menu>
+        </el-col>
+        <el-col :span="4">
+            <el-menu theme="light" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="2"><span style="font-size: 2em;">物料维护</span></el-menu-item>
+            </el-menu>
+        </el-col>
+    </el-row>
+    <el-form :inline="true" :model="itemForm" class="demo-form-inline">
+    <div style="padding: 30px;">
+
+            <el-row justify="center" type="flex" class="row-bg">
+                <el-col :span="10">
+                    <el-form-item label="物料 :">
+                        <el-input placeholder=""
+                                  icon="search"
+                                  v-model="itemForm.item"
+                                  :on-icon-click="handleIconClick"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                    <el-form-item label="版本 :">
+                        <el-input placeholder=""
+                                  v-model="itemForm.reversion"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+    </div>
+
+    <!--<p style="line-height:100%">-->
+    <template>
+        <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="主要信息" name="first">
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="20">
+                        <el-form-item label="描述 :">
+                            <el-input placeholder="" v-model="itemForm.description"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="状态 :">
+                             <el-select v-model="itemForm.status" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in options"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item >
+                            <el-checkbox v-model="itemForm.currentVersion">当前版本</el-checkbox>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="类型 :">
+                            <el-select v-model="itemForm.type" placeholder="请选择">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="批次大小 :">
+                            <el-input placeholder="" v-model="itemForm.lotSize"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="订单类型 :">
+                            <el-select v-model="itemForm.orderType" placeholder="请选择">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="计量单位 :">
+                            <el-input placeholder="" v-model="itemForm.unitOfMeasure"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="工艺路线 :">
+                            <el-input placeholder=""
+                                      icon="search"
+                                      v-model="itemForm.router"
+                                      :on-icon-click="handleIconClick"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="工艺路线版本 :">
+                            <el-input placeholder="" v-model="itemForm.routerVersion"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="物料清单 :">
+                            <el-input placeholder=""
+                                      icon="search"
+                                      v-model="itemForm.bom"
+                                      :on-icon-click="handleIconClick"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="物料清单版本 :">
+                            <el-input placeholder="" v-model="itemForm.bomVersion"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row justify="center" type="flex" class="row-bg">
+                    <el-col :span="10">
+                        <el-form-item label="数量限制 :">
+                            <el-select v-model="itemForm.quantityRestriction" placeholder="请选择">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="数量乘数 :">
+                            <el-input placeholder="" v-model="itemForm.qtyMultiplier"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+            </el-tab-pane>
+            <el-tab-pane label="构建" name="second">
+                构建
+            </el-tab-pane>
+            <el-tab-pane label="时间敏感型物料" name="three">
+                时间敏感型物料
+            </el-tab-pane>
+            <el-tab-pane label="自定义字段" name="four">
+                自定义字段
+            </el-tab-pane>
+        </el-tabs>
+    </template>
+    </el-form>
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mock.js"></script>
+
+<script type="text/javascript" src="http://mockjs.com/dist/mockdata.js"></script>
+<script>
+    //  ------------ 测试产生虚拟数据 -------------------
+    const _groupList = [];
+    for( var i = 0; i < 20; i++){
+        _groupList.push(
+            Mock.mock({
+                "key": Mock.Random.integer(60, 100),
+                "label":Mock.Random.string('upper', 5)
+            })
+        );
+    }
+
+    const _workCenterList = [];
+    for( var i = 0; i < 20; i++){
+        _workCenterList.push(
+            Mock.mock({
+                "key": Mock.Random.integer(60, 100),
+                "label":Mock.Random.string('upper', 5)
+            })
+        );
+    }
+
+    const _itemDataList = [];
+    for( var i = 0; i < 10; i++){
+        _itemDataList.push(
+            Mock.mock({
+                "sequence": Mock.mock('@increment(10)'),
+                "assyItem": Mock.mock('@cword(3)'),
+                "assyOper": Mock.mock('@cword(3)'),
+                "testPart": Mock.mock('@cword(3)'),
+                "assyQty":  Mock.mock('@float(0, 50, 3, 5)'),
+                "assyType": Mock.mock('@cword(3)')
+            })
+        );
+    }
+
+    const userInfra =  Mock.mock({
+        "name":Mock.Random.cname(),
+        "e_mail":Mock.Random.email(),
+        "status|1":["生效","作废"],
+        "date_effect":Mock.Random.date('yyyy-MM-dd'),
+        "date_expire":Mock.Random.date('yyyy-MM-dd')
+    })
+
+    const _bomDataList = [];
+
+    //  ------------ 赋值 ------------------------
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                activeName: 'first',
+                pickerOptions0: {
+                    disabledDate(time) {
+                        return time.getTime() < Date.now() - 8.64e7;
+                    }
+                },
+                formInline: {
+                    userId: ''
+                },
+                userFormRules:{
+
+                },
+                userGroup:_groupList,
+                selectGroup:[],
+                workCenter:_workCenterList,
+                itemData : _itemDataList,
+                bomComponentDialog: false,
+                itemForm:{
+                    item:'',
+                    reversion:'',
+                    description:'',
+                    status:'',
+                    currentVersion:'',
+                    type:'',
+                    lotSize:'',
+                    orderType:'',
+                    unitOfMeasure:'',
+                    routerVersion:'',
+                    router:'',
+                    bomVersion:'',
+                    bom:'',
+                    quantityRestriction:'',
+                    qtyMultiplier:''
+                },
+                bomComponentForm: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: ''
+                },
+            }
+        },
+        methods: {
+            filterMethod() {
+                console.log('submit!');
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            query(){
+                var me = this;
+                for( var p in me.userForm){
+                    me.userForm[p] = userInfra[p]?userInfra[p]:"";
+                }
+            },
+            clear(){
+                var me = this;
+                for( var p in me.userForm){
+                    me.userForm[p] = "";
+                }
+            },
+            handleIconClick(ev) {
+                console.log(ev);
+            },
+            checkChange(obj,isChecked,children){
+                if(isChecked){
+                    this.$refs.bomTree.setCheckedKeys([]);
+                    this.$refs.bomTree.setCheckedKeys([obj.id]);
+                }
+            },
+            remove() {
+                var mTree = this.$refs.bomTree.getCheckedNodes();
+                if( mTree.length>0 ){
+                    /*for(var i=0;i<mTree.length;i++){
+                     var node = mTree[i];
+                     }*/
+                }
+            },
+            load(){
+                var me = this;
+                var mTable = me.$refs.multipleTable.selection;
+                var treeData = me.$refs.bomTree.data;
+                if(mTable.length>0){
+                    for(var i=0;i<mTable.length;i++){
+                        var uid = mTable[i].itemName;
+                        var desc = mTable[i].itemDesc;
+                        // ---- 树形 -------------------
+                        var mTree = me.$refs.bomTree.getCheckedNodes();
+                        if( mTree.length>0 ){
+                            //treeStore.append({ id: uid, label: desc, children: [] }, treeData);
+                            var mTreeNode = mTree[0];
+                            mTreeNode.children.push ({ id: uid, label: desc, children: [] });
+                        }
+                    }
+                }
+            }
+        }
+    })
+</script>
+</html>
